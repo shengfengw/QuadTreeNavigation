@@ -54,7 +54,9 @@ public class QuadTreeViewer extends JPanel implements IUserInterface {
 				y = y + dy / dd * speed;
 				currentPoint.setX(x);
 				currentPoint.setY(y);
-				currQN = qt.getCurrentNode(currentPoint);
+				if ( currQN == null||!qt.withinRange(currQN, currentPoint)) {
+					currQN = qt.getCurrentNode(currentPoint);
+				}
 				double dist = Math.sqrt(Math.pow(x - viewer.route.get(i).getEnd().getX(), 2)
 						+ Math.pow(y - viewer.route.get(i).getEnd().getY(), 2));
 				if (dist <= 0.20) {
@@ -125,7 +127,7 @@ public class QuadTreeViewer extends JPanel implements IUserInterface {
 					viewer.generateEdges();
 					viewer.getPath(userDefinedSrc, userDefinedDes);
 					Runnable runnable = () -> {
-						viewer.walk(0.08);
+						viewer.walk(0.1);
 					};
 					Thread t = new Thread(runnable);
 					t.start();
@@ -195,7 +197,7 @@ public class QuadTreeViewer extends JPanel implements IUserInterface {
 		// System.out.println("painting");
 		super.paint(g);
 		Graphics2D g2D = (Graphics2D) g;
-		g2D.setBackground(new Color(0,0,0,0));
+		g2D.setBackground(new Color(0, 0, 0, 0));
 		// set the stroke
 		g2D.setStroke(st);
 		// draw the quadnodes

@@ -88,6 +88,17 @@ public class QuadTree implements IQuadTree {
 	public boolean contains(Point p) {
 		return !(getNode(p)==null);
 	}
+	/**
+	 * check if the point is in the range of the quadnode
+	 * @param qn the quadnode
+	 * @param p the point
+	 * @return if point p is in the range of quadnode qn
+	 */
+	public boolean withinRange(QuadNode qn,Point p) {
+		double x=p.getX();
+		double y=p.getY();
+		return x>=qn.getMinX()&&x<=qn.getMaxX()&&y>=qn.getMinY()&&y<=qn.getMaxY();
+	}
 
 	@Override
 	public void clear() {
