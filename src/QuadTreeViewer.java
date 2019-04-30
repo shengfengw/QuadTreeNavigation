@@ -3,14 +3,18 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 /**
  * Displays the quadtree and the associated graph
@@ -24,13 +28,42 @@ public class QuadTreeViewer extends JPanel implements IUserInterface {
 	private QuadTree qt;
 	private Graph myGraph;
 	private Point currentPoint;
-	List<Edge> route ;
+	private QuadNode currQN;
+	List<Edge> route;
+	static QuadTreeViewer viewer;
+	private static int userDefinedSize;
+	private static int userDefinedSrc;
+	private static int userDefinedDes;
 
-	private final static int border = 10;
-	private final static int size = 10;
+	private final static int border = 30;
+	private final static int size = 8;
 	private final static int radius = 3;
 
-	private final static BasicStroke stroke = new BasicStroke(2.0f);
+	private final static BasicStroke st = new BasicStroke(2.0f);
+
+	public void walk(double speed) {
+		for (int i = 0; i < route.size(); i++) {
+			currentPoint = new Point(viewer.route.get(i).getStart().getX(), route.get(i).getStart().getY());
+			while (true) {
+				double x = currentPoint.getX();
+				double y = currentPoint.getY();
+				double dx = viewer.route.get(i).getEnd().getX() - viewer.route.get(i).getStart().getX();
+				double dy = viewer.route.get(i).getEnd().getY() - viewer.route.get(i).getStart().getY();
+				double dd = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+				x = x + dx / dd * speed;
+				y = y + dy / dd * speed;
+				currentPoint.setX(x);
+				currentPoint.setY(y);
+				currQN = qt.getCurrentNode(currentPoint);
+				double dist = Math.sqrt(Math.pow(x - viewer.route.get(i).getEnd().getX(), 2)
+						+ Math.pow(y - viewer.route.get(i).getEnd().getY(), 2));
+				if (dist <= 0.20) {
+					break;
+				}
+				viewer.visualize(10);
+			}
+		}
+	}
 
 	/**
 	 * The main function
@@ -38,24 +71,84 @@ public class QuadTreeViewer extends JPanel implements IUserInterface {
 	 * @param args arguments of the program
 	 */
 	public static void main(String args[]) {
-
 		JFrame frame = new JFrame("QuadTree");
-		QuadTreeViewer viewer = new QuadTreeViewer(100,100,60);
-		viewer.getPath(10, 20);
+		viewer = new QuadTreeViewer(100, 100, 1);
+
+		final JTextField sizeT = new JTextField(10);
+		sizeT.setBounds(5, 1, 5, 5);
+		JButton setSizeButton = new JButton("Set Point Size");
+		setSizeButton.setBounds(5, 1, 5, 5);
+		// add size listener
+		setSizeButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				userDefinedSize = Integer.parseInt(sizeT.getText());
+				if (userDefinedSize != 0) {
+					viewer = new QuadTreeViewer(100, 100, userDefinedSize);
+					viewer.getPath(0, 0);
+					frame.getContentPane().add(viewer);
+					viewer.viewQuadTree();
+
+				}
+
+			}
+		});
+
+		viewer.add(setSizeButton);
+		viewer.add(sizeT);
+
+		final JTextField sourceT = new JTextField(10);
+		sourceT.setBounds(5, 1, 5, 5);
+		JButton setSrcButton = new JButton("Set Source");
+		setSrcButton.setBounds(50, 1, 5, 5);
+		// add src listener
+		setSrcButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				userDefinedSrc = Integer.parseInt(sourceT.getText());
+
+			}
+		});
+		viewer.add(setSrcButton);
+		viewer.add(sourceT);
+
+		final JTextField desT = new JTextField(10);
+		desT.setBounds(5, 1, 5, 5);
+		JButton setDesButton = new JButton("Set Destination");
+		setDesButton.setBounds(100, 1, 5, 5);
+		// add des listener
+		setDesButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				userDefinedDes = Integer.parseInt(desT.getText());
+				if (userDefinedSize != 0) {
+					viewer.generateEdges();
+					viewer.getPath(userDefinedSrc, userDefinedDes);
+					Runnable runnable = () -> {
+						viewer.walk(0.08);
+					};
+					Thread t = new Thread(runnable);
+					t.start();
+				}
+			}
+		});
+		viewer.add(setDesButton);
+		viewer.add(desT);
+
 		frame.getContentPane().add(viewer);
 		frame.setSize(viewer.getSize());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
-		viewer.viewQuadTree();
 	}
+
 	/**
 	 * initialize the quadtree and graph object
 	 * 
 	 * @param maxX horizontal length of the window
 	 * @param maxY vertical length of the window
-	 * @param num the number of points to generate
+	 * @param num  the number of points to generate
 	 */
-	public QuadTreeViewer(double maxX, double maxY,int num) {
+	public QuadTreeViewer(double maxX, double maxY, int num) {
 		route = new ArrayList<>();
 		qt = new QuadTree(0, 0, maxX, maxY);
 
@@ -76,7 +169,7 @@ public class QuadTreeViewer extends JPanel implements IUserInterface {
 	 * view the quadtree
 	 */
 	public void viewQuadTree() {
-		visualize(null, 1);
+		visualize(1);
 	}
 
 	/**
@@ -85,8 +178,7 @@ public class QuadTreeViewer extends JPanel implements IUserInterface {
 	 * @param p         The current point
 	 * @param pauseTime The number of milliseconds to pause
 	 */
-	public synchronized void visualize(Point p, int pauseTime) {
-		currentPoint = p;
+	public synchronized void visualize(int pauseTime) {
 		repaint();
 		try {
 			wait(pauseTime);
@@ -100,11 +192,11 @@ public class QuadTreeViewer extends JPanel implements IUserInterface {
 	 * @param g the graphics object to draw quadtree
 	 */
 	public void paint(Graphics g) {
-		System.out.println("painting");
+		// System.out.println("painting");
 		super.paint(g);
 		Graphics2D g2D = (Graphics2D) g;
-		// Make the stroke a thick black line
-		g2D.setStroke(stroke);
+		// set the stroke
+		g2D.setStroke(st);
 		// draw the quadnodes
 		List<QuadNode> qnArray = qt.getQuadNodes();
 
@@ -128,6 +220,13 @@ public class QuadTreeViewer extends JPanel implements IUserInterface {
 			double x = border + size * p.getX();
 			double y = border + size * p.getY();
 			Shape point = new Ellipse2D.Double(x - radius, y - radius, 2 * radius, 2 * radius);
+			g2D.draw(point);
+			int tmp = (int) p.getValue();
+			String label = String.valueOf(tmp);
+			float xx = (float) p.getX();
+			float yy = (float) p.getY();
+
+			g2D.drawString(label, (float) x + radius, (float) y + radius);
 			g2D.draw(point);
 		}
 		// draw the edges
@@ -167,13 +266,48 @@ public class QuadTreeViewer extends JPanel implements IUserInterface {
 		Shape end = new Ellipse2D.Double(x2 - radius, y2 - radius, 2 * radius, 2 * radius);
 		g2D.draw(end);
 
+		// draw the current point
+		if (currentPoint != null) {
+			double x3 = border + size * currentPoint.getX();
+			double y3 = border + size * currentPoint.getY();
+			Shape curr = new Ellipse2D.Double(x3 - 2 * radius, y3 - 2 * radius, 4 * radius, 4 * radius);
+			g2D.draw(curr);
+		}
+
+		// draw the current quadnode
+		if (currQN != null) {
+			g2D.setColor(Color.RED);
+
+			double minX = border + size * currQN.getMinX();
+			double minY = border + size * currQN.getMinY();
+			double maxX = border + size * currQN.getMaxX();
+			double maxY = border + size * currQN.getMaxY();
+			Shape l1 = new Line2D.Double(minX, minY, minX, maxY);
+			g2D.draw(l1);
+			Shape l2 = new Line2D.Double(maxX, minY, maxX, maxY);
+			g2D.draw(l2);
+			Shape l3 = new Line2D.Double(minX, minY, maxX, minY);
+			g2D.draw(l3);
+			Shape l4 = new Line2D.Double(minX, maxY, maxX, maxY);
+			g2D.draw(l4);
+		}
+
 	}
 
 	@Override
 	public List<Edge> getPath(int s, int e) {
-		this.src=s;
-		this.dest=e;
-		this.route=this.myGraph.dijkstra(src, dest);
+
+		List<Point> list = this.myGraph.nodes;
+
+		for (int i = 0; i < list.size(); i++) {
+			if ((int) list.get(i).getValue() == s) {
+				this.src = i;
+			}
+			if ((int) list.get(i).getValue() == e) {
+				this.dest = i;
+			}
+		}
+		this.route = this.myGraph.dijkstra(src, dest);
 		return route;
 
 	}
@@ -181,7 +315,7 @@ public class QuadTreeViewer extends JPanel implements IUserInterface {
 	@Override
 	public void generateEdges() {
 		myGraph.generateEdges();
-		
+
 	}
 
 }

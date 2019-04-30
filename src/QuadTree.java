@@ -18,27 +18,32 @@ public class QuadTree implements IQuadTree {
 
 	@Override
 	public QuadNode getNode(Point p) {
-		return this.getNode(this.root, p);
+		try {
+			return this.getNode(this.root, p);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
-	public QuadNode getNode(QuadNode qn,Point<Integer> p) {
+	public QuadNode getNode(QuadNode qn,Point<Integer> p) throws Exception {
 		if(p.getX()>qn.getMaxX()||p.getX()<qn.getMinX()||p.getY()>qn.getMaxY()||p.getY()<qn.getMinY()) {
-			System.out.println("error getting point, out of bound");
-			return null;
+			throw new Exception("Out of bound");
+
 		}
 		//first case, empty leaf
 		if(qn.getSe()==null&&qn.getSw()==null&&qn.getNe()==null&&qn.getNw()==null&&qn.getP()==null) {
-			System.out.println("point not found");
-			return null;
+			throw new Exception("Point not found");
+
 		}
 		//second case, non-empty leaf, split the quadrant and reinsert
 		if(qn.getSe()==null&&qn.getSw()==null&&qn.getNe()==null&&qn.getNw()==null&&qn.getP()!=null) {
 			if(qn.getP().getX()==p.getX()&&qn.getP().getY()==p.getY()) {
-				System.out.println("found point");
+		//		System.out.println("found point");
 				return qn;
 			}else {
-				System.out.println("point not found");
-				return null;
+				throw new Exception("Point not found");
 			}
 
 		}
@@ -48,6 +53,36 @@ public class QuadTree implements IQuadTree {
 		}
 		return null;
 	}
+	public QuadNode getCurrentNode(Point p) {
+		try {
+			return this.getCurrentNode(this.root, p);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public QuadNode getCurrentNode(QuadNode qn,Point<Integer> p) throws Exception {
+		if(p.getX()>qn.getMaxX()||p.getX()<qn.getMinX()||p.getY()>qn.getMaxY()||p.getY()<qn.getMinY()) {
+			throw new Exception("Out of bound");
+		}
+		//first case, empty leaf
+		if(qn.getSe()==null&&qn.getSw()==null&&qn.getNe()==null&&qn.getNw()==null&&qn.getP()==null) {
+			return qn;
+		}
+		//second case, non-empty leaf, split the quadrant and reinsert
+		if(qn.getSe()==null&&qn.getSw()==null&&qn.getNe()==null&&qn.getNw()==null&&qn.getP()!=null) {
+			return qn;
+
+		}
+		//third case, non-leaf, go to its corresponding child
+		if(qn.getSe()!=null||qn.getSw()!=null||qn.getNe()!=null||qn.getNw()!=null) {
+			return this.getCurrentNode(this.selectQuad(qn, p), p);
+		}
+		return null;
+	}
+	
 
 	@Override
 	public boolean contains(Point p) {
@@ -139,7 +174,8 @@ public class QuadTree implements IQuadTree {
 			
 			double x=r.nextDouble()*(this.root.getMaxX()-this.root.getMinX())+this.root.getMinX();
 			double y=r.nextDouble()*(this.root.getMaxY()-this.root.getMinY())+this.root.getMinY();
-			this.insert(new Point(x,y));
+			this.insert(new Point(x,y, i));
+
 		}
 	}
 	/**

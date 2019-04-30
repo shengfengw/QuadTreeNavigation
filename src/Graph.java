@@ -212,7 +212,7 @@ public class Graph {
 		while (destIndex != srcIndex) {
 			if (pred.get(destIndex) < 0)
 				break;
-			s.push(generateEdgeFromPoints(destIndex, pred.get(destIndex)));
+			s.push(generateEdgeFromPoints(pred.get(destIndex),destIndex));
 			destIndex = pred.get(destIndex);
 
 		}
