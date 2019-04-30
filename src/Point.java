@@ -1,7 +1,7 @@
 
 public class Point<T> {
-	double x;
-	double y;
+	private double x;
+	private double y;
 	private T value;
 	private Point parent;
 	private int rank;

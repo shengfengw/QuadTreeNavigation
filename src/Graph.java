@@ -16,12 +16,12 @@ import java.util.LinkedList;
  *
  */
 public class Graph {
-	List<Point> nodes;
-	List<Edge> edges;
-	HashMap<Point, HashSet<Edge>> adjList;
-	double width;
-	double height;
-	double[][] adjMatrix;
+	private List<Point> nodes;
+	private List<Edge> edges;
+	private HashMap<Point, HashSet<Edge>> adjList;
+	private double width;
+	private double height;
+	private double[][] adjMatrix;
 
 	public Graph(double width, double height) {
 		nodes = new ArrayList<>();

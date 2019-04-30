@@ -195,6 +195,7 @@ public class QuadTreeViewer extends JPanel implements IUserInterface {
 		// System.out.println("painting");
 		super.paint(g);
 		Graphics2D g2D = (Graphics2D) g;
+		g2D.setBackground(new Color(0,0,0,0));
 		// set the stroke
 		g2D.setStroke(st);
 		// draw the quadnodes
@@ -297,7 +298,7 @@ public class QuadTreeViewer extends JPanel implements IUserInterface {
 	@Override
 	public List<Edge> getPath(int s, int e) {
 
-		List<Point> list = this.myGraph.nodes;
+		List<Point> list = this.myGraph.getNodes();
 
 		for (int i = 0; i < list.size(); i++) {
 			if ((int) list.get(i).getValue() == s) {
