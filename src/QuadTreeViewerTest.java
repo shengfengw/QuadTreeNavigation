@@ -9,7 +9,7 @@ public class QuadTreeViewerTest {
 	@Test
 	public void generalTest() {
 		QuadTreeViewer qtv = new QuadTreeViewer(100, 100, 60);
-		assertTrue(qtv.getPath(10, 20).size() != 0);
+		assertTrue(qtv.getPath("1", "2").size() != 0);
 
 	}
 }

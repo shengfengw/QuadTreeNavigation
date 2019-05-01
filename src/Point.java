@@ -1,10 +1,10 @@
 
 public class Point<T> {
-	private double x;
-	private double y;
-	private T value;
-	private Point parent;
-	private int rank;
+	double x;
+	double y;
+	T value;
+	Point parent;
+	int rank;
 	
 	Point(double x,double y,T value){
 		this.x=x;
