@@ -7,6 +7,7 @@ import java.util.Random;
  *
  */
 public class QuadTree implements IQuadTree {
+	
 	private QuadNode root;
 	private QuadTreeViewer viewer;
 	
@@ -37,16 +38,17 @@ public class QuadTree implements IQuadTree {
 			throw new Exception("Point not found");
 
 		}
+		
 		//second case, non-empty leaf, split the quadrant and reinsert
 		if(qn.getSe()==null&&qn.getSw()==null&&qn.getNe()==null&&qn.getNw()==null&&qn.getP()!=null) {
 			if(qn.getP().getX()==p.getX()&&qn.getP().getY()==p.getY()) {
-		//		System.out.println("found point");
 				return qn;
 			}else {
 				throw new Exception("Point not found");
 			}
 
 		}
+		
 		//third case, non-leaf, go to its corresponding child
 		if(qn.getSe()!=null||qn.getSw()!=null||qn.getNe()!=null||qn.getNw()!=null) {
 			return this.getNode(this.selectQuad(qn, p), p);
@@ -67,15 +69,17 @@ public class QuadTree implements IQuadTree {
 		if(p.getX()>qn.getMaxX()||p.getX()<qn.getMinX()||p.getY()>qn.getMaxY()||p.getY()<qn.getMinY()) {
 			throw new Exception("Out of bound");
 		}
+		
 		//first case, empty leaf
 		if(qn.getSe()==null&&qn.getSw()==null&&qn.getNe()==null&&qn.getNw()==null&&qn.getP()==null) {
 			return qn;
 		}
+		
 		//second case, non-empty leaf, split the quadrant and reinsert
 		if(qn.getSe()==null&&qn.getSw()==null&&qn.getNe()==null&&qn.getNw()==null&&qn.getP()!=null) {
 			return qn;
-
 		}
+		
 		//third case, non-leaf, go to its corresponding child
 		if(qn.getSe()!=null||qn.getSw()!=null||qn.getNe()!=null||qn.getNw()!=null) {
 			return this.getCurrentNode(this.selectQuad(qn, p), p);
@@ -113,11 +117,13 @@ public class QuadTree implements IQuadTree {
 			System.out.println("error inserting point, out of bound");
 			return false;
 		}
+		
 		//first case, empty leaf
 		if(qn.getSe()==null&&qn.getSw()==null&&qn.getNe()==null&&qn.getNw()==null&&qn.getP()==null) {
 			qn.setP(p);
 			return true;
 		}
+		
 		//second case, non-empty leaf, split the quadrant and reinsert
 		if(qn.getSe()==null&&qn.getSw()==null&&qn.getNe()==null&&qn.getNw()==null&&qn.getP()!=null) {
 			if(qn.getP().getX()==p.getX()&&qn.getP().getY()==p.getY()) {
@@ -128,6 +134,7 @@ public class QuadTree implements IQuadTree {
 			this.insert(qn, p);
 			return true;
 		}
+		
 		//third case, non-leaf, go to its corresponding child
 		if(qn.getSe()!=null||qn.getSw()!=null||qn.getNe()!=null||qn.getNw()!=null) {
 			return this.insert(this.selectQuad(qn, p), p);
@@ -142,7 +149,8 @@ public class QuadTree implements IQuadTree {
 
 	@Override
 	public QuadNode selectQuad(QuadNode qn, Point p) {
-		// TODO Auto-generated method stub
+		
+		// get the sub node of point p
 		double midX=(qn.getMinX()+qn.getMaxX())/2;
 		double midY=(qn.getMinY()+qn.getMaxY())/2;
 		if(p.getX()<midX) {
@@ -162,7 +170,7 @@ public class QuadTree implements IQuadTree {
 
 	@Override
 	public void split(QuadNode qn) {
-	//	System.out.println("splitting");
+		
 		//first copy the content p of original node
 		Point<Integer> p=qn.getP();
 		double midX=(qn.getMinX()+qn.getMaxX())/2;
@@ -175,6 +183,7 @@ public class QuadTree implements IQuadTree {
 		qn.setP(null);
 		
 	}
+	
 	/**
 	 * generate a quadtree by inserting random points
 	 * @param n the number of points to generate
@@ -182,13 +191,12 @@ public class QuadTree implements IQuadTree {
 	public void generateQuadTree(int n) {
 		Random r=new Random();
 		for(int i=0;i<n;i++) {
-			
 			double x=r.nextDouble()*(this.root.getMaxX()-this.root.getMinX())+this.root.getMinX();
 			double y=r.nextDouble()*(this.root.getMaxY()-this.root.getMinY())+this.root.getMinY();
 			this.insert(new Point(x,y, i));
-
 		}
 	}
+	
 	/**
 	 * get all the quadnodes within the quadtree
 	 * @return a list of all the quadnodes
@@ -198,11 +206,14 @@ public class QuadTree implements IQuadTree {
 		getQuadNodesHelper(res,this.root);
 		return res;		
 	}
+	
 	public void getQuadNodesHelper(List<QuadNode> l,QuadNode qn) {
 		if(qn==null) {
 			return;
 		}
 		l.add(qn);
+		
+		// check the subnode of qn
 		getQuadNodesHelper(l,qn.getNw());
 		getQuadNodesHelper(l,qn.getNe());
 		getQuadNodesHelper(l,qn.getSw());
@@ -217,10 +228,13 @@ public class QuadTree implements IQuadTree {
 		getPointsHelper(res,this.root);
 		return res;	
 	}
+	
 	public void getPointsHelper(List<Point> l,QuadNode qn) {
 		if(qn==null) {
 			return;
 		}
+		
+		// check the point of subnode of qn
 		if(qn.getP()!=null)l.add(qn.getP());
 		getPointsHelper(l,qn.getNw());
 		getPointsHelper(l,qn.getNe());
@@ -228,30 +242,21 @@ public class QuadTree implements IQuadTree {
 		getPointsHelper(l,qn.getSe());
 	}
 
-
 	public QuadNode getRoot() {
 		return root;
 	}
-
-
 
 	public void setRoot(QuadNode root) {
 		this.root = root;
 	}
 
-
-
 	public QuadTreeViewer getViewer() {
 		return viewer;
 	}
 
-
-
 	public void setViewer(QuadTreeViewer viewer) {
 		this.viewer = viewer;
 	}
-
-
 
 	@Override
 	public int size() {

@@ -1,5 +1,6 @@
 
 public class Point<T> {
+	
 	private double x;
 	private double y;
 	private T value;
@@ -13,43 +14,55 @@ public class Point<T> {
 		this.parent=null;
 		rank=0;
 	}
+	
 	Point(double x,double y){
 		this.x=x;
 		this.y=y;
 		this.value=null;
 	}
+	
 	@Override
 	public boolean equals(Object o) {
 		return (this.x==((Point)o).getX()&&this.y==((Point)o).getY());
 		
 	}
+	
 	public double getX() {
 		return x;
 	}
+	
 	public void setX(double x) {
 		this.x = x;
 	}
+	
 	public double getY() {
 		return y;
 	}
+	
 	public void setY(double y) {
 		this.y = y;
 	}
+	
 	public T getValue() {
 		return value;
 	}
+	
 	public void setValue(T value) {
 		this.value = value;
 	}
+	
 	public Point getParent() {
 		return parent;
 	}
+	
 	public void setParent(Point parent) {
 		this.parent = parent;
 	}
+	
 	public int getRank() {
 		return rank;
 	}
+	
 	public void setRank(int rank) {
 		this.rank = rank;
 	}

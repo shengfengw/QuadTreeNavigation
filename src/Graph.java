@@ -56,12 +56,16 @@ public class Graph {
 				double y1 = nodes.get(i).getY();
 				double x2 = nodes.get(j).getX();
 				double y2 = nodes.get(j).getY();
+				
+				// generate the edge based on the distance between two points
 				double distance = Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2));
 				possibleEdges.add(new Edge(nodes.get(i), nodes.get(j), distance));
 			}
 		}
+		
 		// first to ensure connected graph, create mst with Kruskal
 		Collections.sort(possibleEdges);
+		
 		// do union find
 		HashSet<Edge> mst = new HashSet<>();
 		DisjointSet dj = new DisjointSet();
@@ -69,10 +73,10 @@ public class Graph {
 		int e = 0;
 		int v = nodes.size();
 		int i = 0;
+		
+		// while it is not the end, continue the process
 		while (e < v - 1) {
-
 			Edge nextEdge = possibleEdges.get(i++);
-
 			Point start = nextEdge.getStart();
 			Point end = nextEdge.getEnd();
 			Point p1 = dj.find(start);
@@ -184,7 +188,8 @@ public class Graph {
 
 		boolean included[] = new boolean[nodes.size()];
 		List<Integer> pred = new ArrayList<>();
-
+		
+		// initial the shortest and inlcuded
 		for (int i = 0; i < nodes.size(); i++) {
 			shortest[i] = Double.MAX_VALUE;
 			included[i] = false;
@@ -193,7 +198,8 @@ public class Graph {
 		}
 
 		shortest[srcIndex] = 0;
-
+		
+		// run update shortest and included count - 1 times
 		for (int count = 0; count < nodes.size() - 1; count++) {
 			int u = this.pickMinDistanceIndex(shortest, included);
 			included[u] = true;
@@ -209,6 +215,8 @@ public class Graph {
 		}
 
 		Stack<Edge> s = new Stack<>();
+		
+		// return the shortest path
 		while (destIndex != srcIndex) {
 			if (pred.get(destIndex) < 0)
 				break;

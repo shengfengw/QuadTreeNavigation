@@ -28,8 +28,12 @@ public class DisjointSet {
 	public void union(Point p1,Point p2) {
 		Point parent1 = find(p1);
 		Point parent2 = find(p2);
+		
+		// if parents are same, then return
 		if (parent1 == parent2)
 			return;
+		
+		// else union two parents
 		if (parent1.getRank() == parent2.getRank()) {
 			int temp = parent1.getRank();
 			parent2.setParent(parent1);
