@@ -7,6 +7,6 @@ public interface IUserInterface {
 	 * @param e the index of the end point
 	 * @return the list of edges in the path
 	 */
-	public List<Edge> getPath(int s,int e);
+	public List<Edge> getPath(String s,String e);
 	public void generateEdges();
 }

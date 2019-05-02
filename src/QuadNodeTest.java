@@ -21,7 +21,7 @@ public class QuadNodeTest {
 	public void testGetP() {
 		Point<String> point = new Point<String>(1.0, 2.0);
 		QuadNode node = new QuadNode(1.0, 1.0, 2.0, 2.0, point);
-		assertEquals(node.getP().getRank(), 0);
+		assertEquals(node.getP().rank, 0);
 	}
 
 	@Test
@@ -30,7 +30,7 @@ public class QuadNodeTest {
 		QuadNode node = new QuadNode(1.0, 1.0, 2.0, 2.0, point);
 		Point<String> point1 = new Point<String>(1.0, 2.0);
 		node.setP(point1);
-		assertEquals(node.getP().getRank(), 0);
+		assertEquals(node.getP().rank, 0);
 	}
 
 	@Test

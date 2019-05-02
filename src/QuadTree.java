@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 /**
@@ -9,10 +10,14 @@ import java.util.Random;
 public class QuadTree implements IQuadTree {
 	
 	private QuadNode root;
-	private QuadTreeViewer viewer;
+	private List<Point<String>> points;
+	private List<Edge> edges;
+	private HashMap<String,Point<String>> labelToPoint;
 	
 	public QuadTree(double minX,double minY, double maxX, double maxY) {
 		this.root=new QuadNode(minX,minY,maxX,maxY);
+		this.edges=new ArrayList<>();
+		this.labelToPoint=new HashMap<>();
 	}
 	
 
@@ -91,17 +96,6 @@ public class QuadTree implements IQuadTree {
 	@Override
 	public boolean contains(Point p) {
 		return !(getNode(p)==null);
-	}
-	/**
-	 * check if the point is in the range of the quadnode
-	 * @param qn the quadnode
-	 * @param p the point
-	 * @return if point p is in the range of quadnode qn
-	 */
-	public boolean withinRange(QuadNode qn,Point p) {
-		double x=p.getX();
-		double y=p.getY();
-		return x>=qn.getMinX()&&x<=qn.getMaxX()&&y>=qn.getMinY()&&y<=qn.getMaxY();
 	}
 
 	@Override
@@ -193,10 +187,124 @@ public class QuadTree implements IQuadTree {
 		for(int i=0;i<n;i++) {
 			double x=r.nextDouble()*(this.root.getMaxX()-this.root.getMinX())+this.root.getMinX();
 			double y=r.nextDouble()*(this.root.getMaxY()-this.root.getMinY())+this.root.getMinY();
-			this.insert(new Point(x,y, i));
+
+			this.insert(new Point<String>(x,y, Integer.toString(i)));
+
 		}
 	}
 	
+	/**
+	 * import station name, lat and long
+	 */
+	public void importRealPoints() {
+		List<Point<String>> pList=new ArrayList<>();
+		//top ten city from philadelphia
+		pList.add(new Point<String>(40.750580,-73.993584,"New York"));
+		pList.add(new Point<String>(39.292970,-79.345040,"Washington"));
+		pList.add(new Point<String>(40.065030,-77.406750,"Lancaster"));
+		pList.add(new Point<String>(40.295850,-76.704490,"Harrisburg"));
+		pList.add(new Point<String>(39.341480,-76.403610,"Baltimore"));
+		pList.add(new Point<String>(40.7344,-74.1642,"Newark"));
+		pList.add(new Point<String>(40.043540,-75.479310,"Paoli"));
+	//	pList.add(new Point<String>(39.1774,-76.6684,"BWI Airport"));
+		pList.add(new Point<String>(40.032970,-75.631540,"Exton"));
+	//	pList.add(new Point<String>(40.731510,-74.174390,"Newark-EWR"));
+		//top ten city from new york
+		pList.add(new Point<String>(40.000700,-75.272150,"Philadelphia"));
+		pList.add(new Point<String>(42.292210,-71.053880,"Boston"));
+		pList.add(new Point<String>(42.6411,-73.7413,"Albany-Rennsselaer"));
+		pList.add(new Point<String>(42.361230,-71.067800,"Back Bay"));
+		pList.add(new Point<String>(42.124710,-71.182990,"Route 128"));
+		pList.add(new Point<String>(38.895150,-77.216630,"Providence"));
+		pList.add(new Point<String>(39.820690,-75.466360,"Wilmington"));
+		//top ten city from washington
+		pList.add(new Point<String>(40.073040,-74.724320,"Metropark"));
+		pList.add(new Point<String>(40.272030,-74.684920,"Trenton"));
+		pList.add(new Point<String>(36.927690,-82.194840,"Richmond"));
+		pList.add(new Point<String>(41.053429,-73.538734,"Stamford"));
+		
+		this.convertToCoordinates(pList);
+		for(Point<String> p:pList) {
+			this.insert(p);
+		//	System.out.println(p.getX()+" "+p.getY());
+		}
+		for(Point<String> p:pList) {
+			this.labelToPoint.put(p.getValue(), p);
+		}
+		this.points=pList;
+
+	}
+	/**
+	 * convert long and lat to x and y coordinate
+	 * @param pList
+	 */
+	public void convertToCoordinates(List<Point<String>> pList) {
+		double minLat=999;
+		double maxLat=-999;
+		double minLong=999;
+		double maxLong=-999;
+		for(Point<String> p:pList) {
+			minLat=Math.min(minLat, p.getX());
+			maxLat=Math.max(maxLat, p.getX());
+			minLong=Math.min(minLong, p.getY());
+			maxLong=Math.max(maxLong, p.getY());
+		}
+		//since the area is small, use approximation to create x and y on a 2d plane
+		double radius=3958.8;
+		double minY=minLat*Math.PI/180*radius;
+		double maxY=maxLat*Math.PI/180*radius;
+		double minX=minLong*Math.PI/180*radius;
+		double maxX=maxLong*Math.PI/180*radius;
+		
+		//scale the points on a 100*100 map
+		for(Point<String> p:pList) {
+			double x=0.5+(p.getY()*Math.PI/180*radius-minX)*99/(maxX-minX);
+			double y=0.5+(p.getX()*Math.PI/180*radius-minY)*99/(maxY-minY);
+			p.setX(x);
+			p.setY(100-y);
+		}
+	}
+	
+	public void importRealEdges() {
+		List<Edge> edges=new ArrayList<>(); 
+		//From philly
+		edges.add(new Edge(labelToPoint.get("Philadelphia"),labelToPoint.get("New York"),91));
+		edges.add(new Edge(labelToPoint.get("Philadelphia"),labelToPoint.get("Washington"),135));
+		edges.add(new Edge(labelToPoint.get("Philadelphia"),labelToPoint.get("Lancaster"),68));
+		edges.add(new Edge(labelToPoint.get("Philadelphia"),labelToPoint.get("Harrisburg"),104));
+		edges.add(new Edge(labelToPoint.get("Philadelphia"),labelToPoint.get("Baltimore"),95));
+		edges.add(new Edge(labelToPoint.get("Philadelphia"),labelToPoint.get("Newark"),81));
+		edges.add(new Edge(labelToPoint.get("Philadelphia"),labelToPoint.get("Paoli"),19));
+		edges.add(new Edge(labelToPoint.get("Philadelphia"),labelToPoint.get("Exton"),29));
+		//from ny
+		edges.add(new Edge(labelToPoint.get("New York"),labelToPoint.get("Washington"),226));
+	//	edges.add(new Edge(labelToPoint.get("New York"),labelToPoint.get("Philadelphia"),91));
+		edges.add(new Edge(labelToPoint.get("New York"),labelToPoint.get("Boston"),231));
+		edges.add(new Edge(labelToPoint.get("New York"),labelToPoint.get("Albany-Rennsselaer"),142));
+		edges.add(new Edge(labelToPoint.get("New York"),labelToPoint.get("Baltimore"),185));
+		edges.add(new Edge(labelToPoint.get("New York"),labelToPoint.get("Back Bay"),230));
+		edges.add(new Edge(labelToPoint.get("New York"),labelToPoint.get("Route 128"),220));
+		edges.add(new Edge(labelToPoint.get("New York"),labelToPoint.get("Providence"),188));
+		edges.add(new Edge(labelToPoint.get("New York"),labelToPoint.get("Wilmington"),117));
+		//from washington
+		edges.add(new Edge(labelToPoint.get("Washington"),labelToPoint.get("New York"),226));
+		edges.add(new Edge(labelToPoint.get("Washington"),labelToPoint.get("Philadelphia"),135));
+		edges.add(new Edge(labelToPoint.get("Washington"),labelToPoint.get("Baltimore"),41));
+		edges.add(new Edge(labelToPoint.get("Washington"),labelToPoint.get("Newark"),216));
+		edges.add(new Edge(labelToPoint.get("Washington"),labelToPoint.get("Wilmington"),110));
+		edges.add(new Edge(labelToPoint.get("Washington"),labelToPoint.get("Metropark"),202));
+		edges.add(new Edge(labelToPoint.get("Washington"),labelToPoint.get("Trenton"),168));
+		edges.add(new Edge(labelToPoint.get("Washington"),labelToPoint.get("Richmond"),109));
+		edges.add(new Edge(labelToPoint.get("Washington"),labelToPoint.get("Stamford"),262));
+		
+		List<Edge> reverse=new ArrayList<>(); 
+		for(Edge e:edges) {
+			reverse.add(new Edge(e.getEnd(),e.getStart(),e.getWeight()));
+		}
+		edges.addAll(reverse);
+		this.edges=edges;
+
+	}
 	/**
 	 * get all the quadnodes within the quadtree
 	 * @return a list of all the quadnodes
@@ -250,17 +358,39 @@ public class QuadTree implements IQuadTree {
 		this.root = root;
 	}
 
-	public QuadTreeViewer getViewer() {
-		return viewer;
-	}
-
-	public void setViewer(QuadTreeViewer viewer) {
-		this.viewer = viewer;
-	}
-
 	@Override
 	public int size() {
 		return this.getQuadNodes().size();
+	}
+
+
+
+	public List<Edge> getEdges() {
+		return edges;
+	}
+
+
+
+	public void setEdges(List<Edge> edges) {
+		this.edges = edges;
+	}
+
+
+
+	public HashMap<String, Point<String>> getLabelToPoint() {
+		return labelToPoint;
+	}
+
+
+
+	public void setLabelToPoint(HashMap<String, Point<String>> labelToPoint) {
+		this.labelToPoint = labelToPoint;
+	}
+
+
+
+	public void setPoints(List<Point<String>> points) {
+		this.points = points;
 	}
 
 }

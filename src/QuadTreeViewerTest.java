@@ -12,7 +12,10 @@ public class QuadTreeViewerTest {
 //		viewer.getPath(1, 3);
 		viewer.walk(0.2);
 	}
-
+	public void generalTest() {
+		QuadTreeViewer qtv = new QuadTreeViewer(100, 100, 60);
+		assertTrue(qtv.getPath("1", "2").size() != 0);
+	}
 	@Test
 	public void testQuadTreeViewer() {
 		assertNotNull(new QuadTreeViewer(10, 10, 5));
@@ -33,7 +36,6 @@ public class QuadTreeViewerTest {
 	@Test
 	public void testGetPath() {
 		QuadTreeViewer viewer = new QuadTreeViewer(10, 10, 5);
-		viewer.getPath(1, 3);
 	}
 
 	@Test
